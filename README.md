@@ -1,10 +1,10 @@
-# סטטוס בר WIN
+# Virtual System Bar
 
 פס סטטוס קטן שמחליף את אזור ההתראות (המגש) של Windows במחשבי קיוסק.
 במצב קיוסק שורת המשימות מוסתרת, ולכן אין גישה לרמקול, ל-Wi-Fi, ל-Bluetooth ולשפת המקלדת. התוכנה מחזירה את כל אלה
 **בלי לפתוח אף פעם את ההגדרות של Windows**, כך שאי אפשר לעקוף דרכה את החסימה.
 
-**הורדה:** [StatusBarWin.exe](https://github.com/tsoolgee/status-bar-win/releases/latest/download/StatusBarWin.exe) (קובץ יחיד, בלי התקנה)
+**הורדה:** [VirtualSystemBar.exe](https://github.com/tsoolgee/virtual-system-bar/releases/latest/download/VirtualSystemBar.exe) (קובץ יחיד, בלי התקנה)
 
 ![הפס](docs/bar.png)
 
@@ -33,7 +33,7 @@
 - **תצוגה**: באיזו פינה של המסך הפס יושב, וגודל (100% עד 200%).
 - **מערכת**: הפעלה אוטומטית עם כניסת המשתמש, "שומר" שמפעיל את התוכנה מחדש אם סוגרים אותה, החלפת סיסמה, ויציאה מהתוכנה.
 
-ההגדרות נשמרות ב-`C:\ProgramData\StatusBarWin\config.json`. אם שמים קובץ `config.json` ליד ה-EXE, התוכנה עובדת במצב נייד ומשתמשת בו.
+ההגדרות נשמרות ב-`C:\ProgramData\VirtualSystemBar\config.json`. אם שמים קובץ `config.json` ליד ה-EXE, התוכנה עובדת במצב נייד ומשתמשת בו.
 
 ## הגנה מפני עקיפה
 

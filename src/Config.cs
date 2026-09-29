@@ -6,7 +6,7 @@ using System.Text;
 using System.Web.Script.Serialization;
 using Microsoft.Win32;
 
-namespace StatusBarWin
+namespace VirtualSystemBar
 {
     public class AppConfig
     {
@@ -59,12 +59,13 @@ namespace StatusBarWin
             {
                 string beside = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
                 if (File.Exists(beside)) return beside;   // portable mode
-                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "StatusBarWin", "config.json");
+                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "VirtualSystemBar", "config.json");
             }
         }
 
         public static AppConfig Load()
         {
+            MigrateOldName();
             try
             {
                 if (File.Exists(FilePath))
@@ -92,8 +93,33 @@ namespace StatusBarWin
             if (File.Exists(p)) File.Replace(tmp, p, null); else File.Move(tmp, p);
         }
 
+        /// <summary>0.0.1 was called "StatusBarWin": carry its settings and auto-start over to the new name.</summary>
+        static void MigrateOldName()
+        {
+            try
+            {
+                string data = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+                string oldCfg = Path.Combine(data, "StatusBarWin", "config.json");
+                string newCfg = Path.Combine(data, "VirtualSystemBar", "config.json");
+                if (File.Exists(oldCfg) && !File.Exists(newCfg))
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(newCfg));
+                    File.Copy(oldCfg, newCfg);
+                }
+                using (var k = Registry.CurrentUser.OpenSubKey(RunKey, true))
+                {
+                    if (k?.GetValue("StatusBarWin") != null)
+                    {
+                        k.DeleteValue("StatusBarWin", false);
+                        k.SetValue(RunName, "\"" + Program.ExePath + "\"");
+                    }
+                }
+            }
+            catch { }
+        }
+
         const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
-        const string RunName = "StatusBarWin";
+        const string RunName = "VirtualSystemBar";
 
         public static bool AutoStart
         {

@@ -7,7 +7,7 @@ using System.Windows.Forms;
 using Windows.Devices.Enumeration;
 using Panel = System.Windows.Forms.Panel;
 
-namespace StatusBarWin
+namespace VirtualSystemBar
 {
     class VolumePopup : Popup
     {

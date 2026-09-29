@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace StatusBarWin
+namespace VirtualSystemBar
 {
     /// <summary>Master volume, mute and output device through Core Audio - no Windows UI involved.</summary>
     static class Audio

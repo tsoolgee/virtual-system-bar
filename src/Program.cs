@@ -3,11 +3,11 @@ using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace StatusBarWin
+namespace VirtualSystemBar
 {
     static class Program
     {
-        public const string Title = "סטטוס בר WIN";
+        public const string Title = "Virtual System Bar";
         public static string ExePath => Process.GetCurrentProcess().MainModule.FileName;
 
         [STAThread]
@@ -16,7 +16,7 @@ namespace StatusBarWin
             if (args.Length == 2 && args[0] == "--guard" && int.TryParse(args[1], out int pid))
                 return Guard.Run(pid);
 
-            using (var mutex = new Mutex(true, @"Local\StatusBarWin.SingleInstance", out bool first))
+            using (var mutex = new Mutex(true, @"Local\VirtualSystemBar.SingleInstance", out bool first))
             {
                 if (!first) return 0;
                 Application.EnableVisualStyles();

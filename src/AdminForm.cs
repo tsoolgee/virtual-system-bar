@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
 
-namespace StatusBarWin
+namespace VirtualSystemBar
 {
     /// <summary>Admin settings, reached only through the password. RightToLeftLayout mirrors the X coordinates below.</summary>
     class AdminForm : Form
