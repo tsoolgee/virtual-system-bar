@@ -15,7 +15,7 @@ namespace VirtualSystemBar
     /// </summary>
     class BarForm : Form
     {
-        enum Kind { Clock, Volume, Wifi, Lang, Keyboard, Bt, Usb, Battery, Gear }
+        enum Kind { Clock, Volume, Wifi, Lang, Keyboard, Bt, Usb, Battery, Gear, Close }
 
         class Item
         {
@@ -104,6 +104,7 @@ namespace VirtualSystemBar
                 case Kind.Bt: return _cfg.ShowBt && _hasBt;
                 case Kind.Usb: return _cfg.ShowUsb && _usbCount > 0;
                 case Kind.Battery: return _cfg.ShowBattery && HasBattery;
+                case Kind.Close: return _cfg.ShowClose;
                 default: return true;
             }
         }
@@ -119,6 +120,7 @@ namespace VirtualSystemBar
                 case Kind.Lang: return Ui.Px(42);
                 case Kind.Battery: return Ui.Px(64);
                 case Kind.Gear: return Ui.Px(34);
+                case Kind.Close: return Ui.Px(30);
                 default: return Ui.Px(38);
             }
         }
@@ -127,8 +129,8 @@ namespace VirtualSystemBar
         {
             _items.Clear();
             int x = Ui.Px(4), h = Ui.Px(40);
-            // same order as the Windows tray in the request's screenshot, left to right; settings at the far right
-            foreach (Kind k in new[] { Kind.Clock, Kind.Volume, Kind.Wifi, Kind.Lang, Kind.Keyboard, Kind.Bt, Kind.Usb, Kind.Battery, Kind.Gear })
+            // same order as the Windows tray in the request's screenshot, left to right; settings and X at the far right
+            foreach (Kind k in new[] { Kind.Clock, Kind.Volume, Kind.Wifi, Kind.Lang, Kind.Keyboard, Kind.Bt, Kind.Usb, Kind.Battery, Kind.Gear, Kind.Close })
             {
                 if (!Visible_(k)) continue;
                 int w = WidthOf(k);
@@ -248,6 +250,9 @@ namespace VirtualSystemBar
                         case Kind.Gear:
                             using (var gi = Ui.Icons(10)) Glyph(g, gi, r, G.Settings, true, Ui.Sub);
                             break;
+                        case Kind.Close:
+                            using (var gi = Ui.Icons(9)) Glyph(g, gi, r, G.Close, true, Ui.Sub);
+                            break;
                     }
                 }
             }
@@ -305,6 +310,7 @@ namespace VirtualSystemBar
                 case Kind.Usb: return "הוצאת התקן בבטחה";
                 case Kind.Battery: return "סוללה";
                 case Kind.Gear: return "הגדרות (מנהל)";
+                case Kind.Close: return _cfg.CloseNeedsPassword ? "סגירת התוכנה (סיסמת מנהל)" : "סגירת התוכנה";
             }
             return null;
         }
@@ -353,6 +359,9 @@ namespace VirtualSystemBar
                 case Kind.Gear:
                     OpenAdmin();
                     break;
+                case Kind.Close:
+                    if (!_cfg.CloseNeedsPassword || AskAdmin("סגירת התוכנה")) ExitApp();
+                    break;
             }
         }
 
@@ -375,29 +384,36 @@ namespace VirtualSystemBar
 
         // ---------- admin ----------
 
-        void OpenAdmin()
+        /// <summary>Asks for the admin password (or sets it on first run). True when the admin is confirmed.</summary>
+        bool AskAdmin(string title)
         {
             if (!Pwd.IsSet(_cfg))
             {
                 // first run: the admin chooses the password before anything else
                 string p1 = AskDialog.Ask(this, "הגדרת סיסמת מנהל", "זו הפעלה ראשונה. בחר סיסמת מנהל להגדרות:", true);
-                if (string.IsNullOrEmpty(p1)) return;
+                if (string.IsNullOrEmpty(p1)) return false;
                 string p2 = AskDialog.Ask(this, "הגדרת סיסמת מנהל", "הקלד שוב את הסיסמה:", true);
-                if (p1 != p2) { Msg.Info(this, "הסיסמאות לא זהות"); return; }
+                if (p1 != p2) { Msg.Info(this, "הסיסמאות לא זהות"); return false; }
                 Pwd.Set(_cfg, p1);
-                if (!TrySave(_cfg)) return;
+                return TrySave(_cfg);
             }
             else
             {
-                if (Pwd.LockSecondsLeft > 0) { Msg.Info(this, $"יותר מדי ניסיונות שגויים. נסה שוב בעוד {Pwd.LockSecondsLeft} שניות."); return; }
-                string p = AskDialog.Ask(this, "הגדרות", "סיסמת מנהל:", true);
-                if (p == null) return;
+                if (Pwd.LockSecondsLeft > 0) { Msg.Info(this, $"יותר מדי ניסיונות שגויים. נסה שוב בעוד {Pwd.LockSecondsLeft} שניות."); return false; }
+                string p = AskDialog.Ask(this, title, "סיסמת מנהל:", true);
+                if (p == null) return false;
                 if (!Pwd.Check(_cfg, p))
                 {
-                    Msg.Info(this, Pwd.LockSecondsLeft > 0 ? "יותר מדי ניסיונות שגויים. ההגדרות נעולות לדקה." : "סיסמה שגויה");
-                    return;
+                    Msg.Info(this, Pwd.LockSecondsLeft > 0 ? "יותר מדי ניסיונות שגויים. ננעל לדקה." : "סיסמה שגויה");
+                    return false;
                 }
+                return true;
             }
+        }
+
+        void OpenAdmin()
+        {
+            if (!AskAdmin("הגדרות")) return;
 
             using (var f = new AdminForm(_cfg))
             {

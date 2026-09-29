@@ -51,6 +51,9 @@ namespace VirtualSystemBar
             Check("Bluetooth", _c.ShowBt, v => _c.ShowBt = v);
             Check("הוצאת USB בבטחה (מוצג רק כשמחובר התקן)", _c.ShowUsb, v => _c.ShowUsb = v);
             Check("סוללה (רק במחשב נייד)", _c.ShowBattery, v => _c.ShowBattery = v);
+            Check("כפתור X לסגירת התוכנה", _c.ShowClose, v => _c.ShowClose = v);
+            Check("סגירה ב-X דורשת סיסמת מנהל", _c.CloseNeedsPassword, v => _c.CloseNeedsPassword = v, 1);
+            Note("אם לא מסומן, כל משתמש יכול לסגור את התוכנה (למשל כשהפס מסתיר לו משהו).");
 
             Section("שמע");
             var max = new NumericUpDown { Minimum = 5, Maximum = 100, Increment = 5, Value = _c.VolumeMax, Width = Ui.Px(70), Font = Ui.F(10) };
@@ -168,7 +171,8 @@ namespace VirtualSystemBar
             var cb = new CheckBox
             {
                 Text = text, Checked = value, AutoSize = false, Font = Ui.F(10), UseMnemonic = false,
-                Location = new Point(Ui.Px(24 + indent * 22), _y), Size = new Size(_w - Ui.Px(64 + indent * 22), Ui.Px(26)),
+                // the scroll panel is not mirrored: indent by narrowing from the right
+                Location = new Point(Ui.Px(24), _y), Size = new Size(_w - Ui.Px(64 + indent * 22), Ui.Px(26)),
             };
             cb.CheckedChanged += (s, e) => set(cb.Checked);
             _body.Controls.Add(cb);

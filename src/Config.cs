@@ -20,6 +20,8 @@ namespace VirtualSystemBar
         public bool ShowUsb { get; set; } = true;
         public bool ShowBattery { get; set; } = true;
         public bool HebrewDate { get; set; } = true;
+        public bool ShowClose { get; set; } = true;          // X at the end of the bar
+        public bool CloseNeedsPassword { get; set; } = true; // off = any user may close the bar
 
         // restrictions inside the components
         public int VolumeMax { get; set; } = 100;

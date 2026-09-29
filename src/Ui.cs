@@ -86,7 +86,7 @@ namespace VirtualSystemBar
         public const string Wifi = "", Wifi1 = "", Wifi2 = "", Wifi3 = "", Globe = "", Ethernet = "";
         public const string Bluetooth = "", Keyboard = "", Usb = "", Settings = "", Lock = "";
         public const string Refresh = "", Back = "", Speaker = "", Headphones = "", Device = "";
-        public const string Mouse = "", Phone = "", Drive = "", Check = "", Add = "";
+        public const string Mouse = "", Phone = "", Drive = "", Check = "", Add = "", Close = "";
 
         public static string Volume(int level, bool mute) =>
             mute || level == 0 ? Mute : level < 34 ? Vol1 : level < 67 ? Vol2 : Vol3;
