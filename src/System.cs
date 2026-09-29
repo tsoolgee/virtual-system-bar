@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace KioskTray
+namespace StatusBarWin
 {
     /// <summary>External drives and "safely remove" without the Windows dialog.</summary>
     static class Usb

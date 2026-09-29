@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace KioskTray
+namespace StatusBarWin
 {
     /// <summary>Master volume, mute and output device through Core Audio - no Windows UI involved.</summary>
     static class Audio

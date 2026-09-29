@@ -6,7 +6,7 @@ using System.Text;
 using System.Web.Script.Serialization;
 using Microsoft.Win32;
 
-namespace KioskTray
+namespace StatusBarWin
 {
     public class AppConfig
     {
@@ -59,7 +59,7 @@ namespace KioskTray
             {
                 string beside = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
                 if (File.Exists(beside)) return beside;   // portable mode
-                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "KioskTray", "config.json");
+                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "StatusBarWin", "config.json");
             }
         }
 
@@ -93,7 +93,7 @@ namespace KioskTray
         }
 
         const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
-        const string RunName = "KioskTray";
+        const string RunName = "StatusBarWin";
 
         public static bool AutoStart
         {

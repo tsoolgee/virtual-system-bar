@@ -3,11 +3,11 @@ using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace KioskTray
+namespace StatusBarWin
 {
     static class Program
     {
-        public const string Title = "מגש קיוסק";
+        public const string Title = "סטטוס בר WIN";
         public static string ExePath => Process.GetCurrentProcess().MainModule.FileName;
 
         [STAThread]
@@ -16,7 +16,7 @@ namespace KioskTray
             if (args.Length == 2 && args[0] == "--guard" && int.TryParse(args[1], out int pid))
                 return Guard.Run(pid);
 
-            using (var mutex = new Mutex(true, @"Local\KioskTray.SingleInstance", out bool first))
+            using (var mutex = new Mutex(true, @"Local\StatusBarWin.SingleInstance", out bool first))
             {
                 if (!first) return 0;
                 Application.EnableVisualStyles();

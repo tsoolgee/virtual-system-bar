@@ -6,7 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace KioskTray
+namespace StatusBarWin
 {
     static class Ui
     {

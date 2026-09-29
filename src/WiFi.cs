@@ -7,7 +7,7 @@ using Windows.Devices.WiFi;
 using Windows.Networking.Connectivity;
 using Windows.Security.Credentials;
 
-namespace KioskTray
+namespace StatusBarWin
 {
     /// <summary>The Wi-Fi and Bluetooth radios (on/off switches), shared by both popups and the bar.</summary>
     static class Radios

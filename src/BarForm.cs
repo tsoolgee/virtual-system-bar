@@ -7,7 +7,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Microsoft.Win32;
 
-namespace KioskTray
+namespace StatusBarWin
 {
     /// <summary>
     /// The always-on-top strip that replaces the Windows tray. It never takes focus, so the kiosk

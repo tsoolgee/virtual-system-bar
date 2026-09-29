@@ -7,7 +7,7 @@ using System.Windows.Forms;
 using Windows.Devices.Enumeration;
 using Panel = System.Windows.Forms.Panel;
 
-namespace KioskTray
+namespace StatusBarWin
 {
     class VolumePopup : Popup
     {

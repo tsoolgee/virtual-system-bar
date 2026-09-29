@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Enumeration;
 
-namespace KioskTray
+namespace StatusBarWin
 {
     static class Bt
     {

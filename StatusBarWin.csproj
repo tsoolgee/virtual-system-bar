@@ -5,13 +5,13 @@
     <UseWindowsForms>true</UseWindowsForms>
     <LangVersion>latest</LangVersion>
     <Nullable>disable</Nullable>
-    <AssemblyName>KioskTray</AssemblyName>
-    <RootNamespace>KioskTray</RootNamespace>
+    <AssemblyName>StatusBarWin</AssemblyName>
+    <RootNamespace>StatusBarWin</RootNamespace>
     <ApplicationManifest>src\app.manifest</ApplicationManifest>
     <ApplicationIcon>src\app.ico</ApplicationIcon>
     <Version>0.0.1</Version>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
-    <Product>מגש קיוסק</Product>
+    <Product>סטטוס בר WIN</Product>
     <Company>tsoolgee</Company>
     <DebugType>none</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
