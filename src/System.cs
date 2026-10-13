@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using Microsoft.Win32;
 
 namespace VirtualSystemBar
 {
@@ -207,5 +208,65 @@ namespace VirtualSystemBar
         [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint pid);
         [DllImport("user32.dll")] static extern bool PostMessage(IntPtr hwnd, int msg, IntPtr w, IntPtr l);
         [DllImport("user32.dll")] static extern IntPtr GetDesktopWindow();
+    }
+
+    /// <summary>
+    /// The bar can't appear on the lock screen: Windows draws it on its own protected desktop. What it can do is
+    /// switch on the Windows policy that removes the network button there, so nobody changes Wi-Fi without signing in.
+    /// Writing the policy needs Windows admin rights, so a second copy of the EXE does it elevated (UAC).
+    /// </summary>
+    static class LockScreen
+    {
+        const string Key = @"SOFTWARE\Policies\Microsoft\Windows\System";
+        const string Value = "DontDisplayNetworkSelectionUI";
+        public const string Arg = "--lock-net";
+
+        public static bool HideNetwork
+        {
+            get
+            {
+                try
+                {
+                    using (var hk = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
+                    using (var k = hk.OpenSubKey(Key))
+                        return k?.GetValue(Value) is int v && v == 1;
+                }
+                catch { return false; }
+            }
+        }
+
+        /// <summary>Runs inside the elevated copy. Exit code 0 = written.</summary>
+        public static int Write(bool hide)
+        {
+            try
+            {
+                using (var hk = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
+                using (var k = hk.CreateSubKey(Key))
+                {
+                    if (hide) k.SetValue(Value, 1, RegistryValueKind.DWord);
+                    else k.DeleteValue(Value, false);
+                }
+                return 0;
+            }
+            catch { return 1; }
+        }
+
+        /// <summary>Asks Windows for admin rights and applies the setting. Returns an error to show, or null.</summary>
+        public static string Apply(bool hide)
+        {
+            try
+            {
+                var p = Process.Start(new ProcessStartInfo(Program.ExePath, Arg + " " + (hide ? "1" : "0"))
+                { UseShellExecute = true, Verb = "runas", WindowStyle = ProcessWindowStyle.Hidden });
+                p.WaitForExit();
+                if (p.ExitCode != 0 || HideNetwork != hide) return "שינוי ההגדרה של מסך הנעילה נכשל.";
+                return null;
+            }
+            catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 1223)
+            {
+                return "ההגדרה של מסך הנעילה לא שונתה: לא אושרו הרשאות מנהל של Windows.";
+            }
+            catch (Exception ex) { return "שינוי ההגדרה של מסך הנעילה נכשל:\n" + ex.Message; }
+        }
     }
 }

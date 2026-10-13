@@ -15,6 +15,8 @@ namespace VirtualSystemBar
         {
             if (args.Length == 2 && args[0] == "--guard" && int.TryParse(args[1], out int pid))
                 return Guard.Run(pid);
+            if (args.Length == 2 && args[0] == LockScreen.Arg)
+                return LockScreen.Write(args[1] == "1");
 
             using (var mutex = new Mutex(true, @"Local\VirtualSystemBar.SingleInstance", out bool first))
             {

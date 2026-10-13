@@ -98,6 +98,13 @@ namespace VirtualSystemBar
             var size = Combo(sizes.Select(x => x + "%").ToArray(), Array.IndexOf(sizes, _c.ScalePct));
             size.SelectedIndexChanged += (s, e) => _c.ScalePct = sizes[Math.Max(0, size.SelectedIndex)];
             Line("גודל", size);
+            Check("כששורת המשימות של Windows מוצגת, הפס יושב מעליה", _c.AboveTaskbar, v => _c.AboveTaskbar = v);
+            Note("כך מקש Windows ותפריט התחל לא מסתירים את הפס. גם שורת משימות שמוסתרת אוטומטית: כשהיא קופצת, הפס זז מעליה. אם לא מסומן, הפס מכסה את המגש המקורי, אבל אחרי לחיצה על מקש Windows שורת המשימות מסתירה אותו לכמה שניות.");
+
+            Section("מסך הנעילה");
+            bool lockNetWas = LockScreen.HideNetwork, lockNet = lockNetWas;
+            Check("להסתיר את כפתור הרשת (Wi-Fi) במסך הנעילה והכניסה", lockNet, v => lockNet = v);
+            Note("הפס עצמו לא יכול להופיע במסך הנעילה, כי Windows מציג אותו על שולחן עבודה נפרד ומוגן. ההגדרה הזו מפעילה מדיניות של Windows שמסירה משם את כפתור הרשת, כך שאי אפשר לשנות את חיבור הרשת בלי להיכנס למשתמש. היא חלה על כל המשתמשים במחשב, ובשמירה Windows יבקש הרשאות מנהל.");
 
             Section("מערכת");
             bool autoStart = false;
@@ -133,6 +140,11 @@ namespace VirtualSystemBar
                 _c.WifiWhitelist = wl.Lines.Select(x => x.Trim()).Where(x => x.Length > 0).Distinct().ToList();
                 if (_c.WifiWhitelistOn && _c.WifiWhitelist.Count == 0 &&
                     !Msg.YesNo(this, "הרשימה הלבנה ריקה, כך שאף רשת לא תוצג. להמשיך?")) return;
+                if (lockNet != lockNetWas)
+                {
+                    string err = LockScreen.Apply(lockNet);
+                    if (err != null) Msg.Info(this, err);
+                }
                 Result = _c;
                 DialogResult = DialogResult.OK;
             };

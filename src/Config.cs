@@ -37,6 +37,7 @@ namespace VirtualSystemBar
 
         // look & system
         public string Corner { get; set; } = "BottomRight";
+        public bool AboveTaskbar { get; set; } = true;   // sit above a visible Windows taskbar instead of over it
         public int ScalePct { get; set; } = 100;
         public bool Watchdog { get; set; } = true;
 

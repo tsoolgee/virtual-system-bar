@@ -28,6 +28,12 @@ namespace VirtualSystemBar
         readonly ToolTip _tip = new ToolTip { ShowAlways = true };
         readonly Timer _fast = new Timer { Interval = 1000 };
         readonly Timer _slow = new Timer { Interval = 3000 };
+        readonly Timer _raise = new Timer { Interval = 100 };
+        int _raiseLeft;
+        readonly Timer _dodge = new Timer { Interval = 200 };
+        readonly Native.WinEventProc _onForeground;   // kept in a field so the GC doesn't collect the callback
+        IntPtr _fgHook;
+        Rectangle _area;
         readonly uint _myPid = (uint)Process.GetCurrentProcess().Id;
         Item _hover;
         Popup _popup;
@@ -56,6 +62,9 @@ namespace VirtualSystemBar
 
             _fast.Tick += (s, e) => FastTick();
             _slow.Tick += async (s, e) => await SlowTick();
+            _raise.Tick += (s, e) => { KeepOnTop(); Dodge(); if (--_raiseLeft <= 0) _raise.Stop(); };
+            _dodge.Tick += (s, e) => Dodge();
+            _onForeground = (h, ev, hwnd, obj, child, thread, time) => RaiseSoon();
             SystemEvents.DisplaySettingsChanged += OnDisplayChanged;
             Guard.Ensure(_cfg.Watchdog);
             RefreshLocal();
@@ -85,6 +94,9 @@ namespace VirtualSystemBar
             base.OnShown(e);
             _fast.Start();
             _slow.Start();
+            _dodge.Start();
+            // Start, the taskbar and the like come up over every topmost window: climb back the moment focus moves
+            _fgHook = Native.SetWinEventHook(Native.EVENT_SYSTEM_FOREGROUND, Native.EVENT_SYSTEM_FOREGROUND, IntPtr.Zero, _onForeground, 0, 0, 0 /*OUTOFCONTEXT*/);
             await SlowTick();
         }
 
@@ -138,7 +150,7 @@ namespace VirtualSystemBar
                 x += w;
             }
             var size = new Size(x + Ui.Px(4), h);
-            var scr = Screen.PrimaryScreen.Bounds;   // kiosk: no taskbar, so the whole screen
+            var scr = _area = Area();
             int left = _cfg.Corner.EndsWith("Left") ? scr.Left : scr.Right - size.Width;
             int top = _cfg.Corner.StartsWith("Top") ? scr.Top : scr.Bottom - size.Height;
             Bounds = new Rectangle(left, top, size.Width, size.Height);
@@ -147,12 +159,58 @@ namespace VirtualSystemBar
 
         bool AtTop => _cfg.Corner.StartsWith("Top");
 
+        /// <summary>
+        /// The screen minus the part of the Windows taskbar that is on screen right now. Unlike WorkingArea this also
+        /// follows an auto-hidden taskbar while it slides in. Kiosk without a taskbar: the whole screen.
+        /// </summary>
+        Rectangle Area()
+        {
+            var a = Screen.PrimaryScreen.Bounds;
+            if (!_cfg.AboveTaskbar) return a;
+            IntPtr tray = Native.FindWindow("Shell_TrayWnd", null);
+            if (tray == IntPtr.Zero || !Native.IsWindowVisible(tray) || !Native.GetWindowRect(tray, out var r)) return a;
+            var v = Rectangle.Intersect(a, Rectangle.FromLTRB(r.Left, r.Top, r.Right, r.Bottom));
+            if (v.Width >= a.Width / 2 && v.Height > 4)
+            {
+                if (v.Top <= a.Top) a = Rectangle.FromLTRB(a.Left, v.Bottom, a.Right, a.Bottom);
+                else a = Rectangle.FromLTRB(a.Left, a.Top, a.Right, v.Top);
+            }
+            else if (v.Height >= a.Height / 2 && v.Width > 4)
+            {
+                if (v.Left <= a.Left) a = Rectangle.FromLTRB(v.Right, a.Top, a.Right, a.Bottom);
+                else a = Rectangle.FromLTRB(a.Left, a.Top, v.Left, a.Bottom);
+            }
+            return a;
+        }
+
         // ---------- state ----------
+
+        // keep above full-screen kiosk windows
+        void KeepOnTop() => Native.SetWindowPos(Handle, Native.HWND_TOPMOST, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0010 /*NOSIZE|NOMOVE|NOACTIVATE*/);
+
+        /// <summary>
+        /// While Start is open Windows lifts the taskbar into a band above all topmost windows, and drops it back
+        /// a second or two after Start closes (sometimes lifting it once more). Nothing without UIAccess gets above
+        /// that band, so: retry for 4 seconds to be back on top as soon as it drops, and with AboveTaskbar step
+        /// out of its way altogether.
+        /// </summary>
+        void RaiseSoon()
+        {
+            KeepOnTop();
+            Dodge();
+            _raiseLeft = 40;
+            _raise.Start();
+        }
+
+        // the taskbar was shown, hidden, moved, or an auto-hidden one slid in
+        void Dodge()
+        {
+            if (_cfg.AboveTaskbar && Area() != _area) Relayout();
+        }
 
         void FastTick()
         {
-            // keep above full-screen kiosk windows
-            Native.SetWindowPos(Handle, Native.HWND_TOPMOST, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0010 /*NOSIZE|NOMOVE|NOACTIVATE*/);
+            KeepOnTop();
             IntPtr fg = Native.GetForegroundWindow();
             if (fg != IntPtr.Zero)
             {
@@ -448,6 +506,7 @@ namespace VirtualSystemBar
             // Alt+F4 and the like: only the admin's "exit" closes the bar; Windows shutdown/logoff always may
             if (!_exiting && e.CloseReason == CloseReason.UserClosing) { e.Cancel = true; return; }
             SystemEvents.DisplaySettingsChanged -= OnDisplayChanged;
+            if (_fgHook != IntPtr.Zero) { Native.UnhookWinEvent(_fgHook); _fgHook = IntPtr.Zero; }
             base.OnFormClosing(e);
         }
     }
