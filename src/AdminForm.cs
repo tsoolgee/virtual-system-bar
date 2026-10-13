@@ -98,8 +98,8 @@ namespace VirtualSystemBar
             var size = Combo(sizes.Select(x => x + "%").ToArray(), Array.IndexOf(sizes, _c.ScalePct));
             size.SelectedIndexChanged += (s, e) => _c.ScalePct = sizes[Math.Max(0, size.SelectedIndex)];
             Line("גודל", size);
-            Check("כששורת המשימות של Windows מוצגת, הפס יושב מעליה", _c.AboveTaskbar, v => _c.AboveTaskbar = v);
-            Note("כך מקש Windows ותפריט התחל לא מסתירים את הפס. גם שורת משימות שמוסתרת אוטומטית: כשהיא קופצת, הפס זז מעליה. אם לא מסומן, הפס מכסה את המגש המקורי, אבל אחרי לחיצה על מקש Windows שורת המשימות מסתירה אותו לכמה שניות.");
+            Check("כששורת המשימות של Windows מוצגת, הפס יושב מעליה", _c.SitAboveTaskbar, v => _c.SitAboveTaskbar = v);
+            Note("אם לא מסומן (ברירת המחדל), הפס מכסה את המגש המקורי ומחליף אותו. אחרי לחיצה על מקש Windows שורת המשימות עולה מעליו כל עוד תפריט התחל פתוח, והפס חוזר מיד כשהתפריט נסגר. אם מסומן, הפס יושב מעל שורת המשימות ואף פעם לא מוסתר, גם כשהיא מוסתרת אוטומטית וקופצת.");
 
             Section("מסך הנעילה");
             bool lockNetWas = LockScreen.HideNetwork, lockNet = lockNetWas;

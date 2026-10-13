@@ -166,7 +166,7 @@ namespace VirtualSystemBar
         Rectangle Area()
         {
             var a = Screen.PrimaryScreen.Bounds;
-            if (!_cfg.AboveTaskbar) return a;
+            if (!_cfg.SitAboveTaskbar) return a;
             IntPtr tray = Native.FindWindow("Shell_TrayWnd", null);
             if (tray == IntPtr.Zero || !Native.IsWindowVisible(tray) || !Native.GetWindowRect(tray, out var r)) return a;
             var v = Rectangle.Intersect(a, Rectangle.FromLTRB(r.Left, r.Top, r.Right, r.Bottom));
@@ -191,7 +191,7 @@ namespace VirtualSystemBar
         /// <summary>
         /// While Start is open Windows lifts the taskbar into a band above all topmost windows, and drops it back
         /// a second or two after Start closes (sometimes lifting it once more). Nothing without UIAccess gets above
-        /// that band, so: retry for 4 seconds to be back on top as soon as it drops, and with AboveTaskbar step
+        /// that band, so: retry for 4 seconds to be back on top as soon as it drops, and with SitAboveTaskbar step
         /// out of its way altogether.
         /// </summary>
         void RaiseSoon()
@@ -205,7 +205,7 @@ namespace VirtualSystemBar
         // the taskbar was shown, hidden, moved, or an auto-hidden one slid in
         void Dodge()
         {
-            if (_cfg.AboveTaskbar && Area() != _area) Relayout();
+            if (_cfg.SitAboveTaskbar && Area() != _area) Relayout();
         }
 
         void FastTick()

@@ -37,7 +37,9 @@ namespace VirtualSystemBar
 
         // look & system
         public string Corner { get; set; } = "BottomRight";
-        public bool AboveTaskbar { get; set; } = true;   // sit above a visible Windows taskbar instead of over it
+        // off (default) = cover the Windows tray, as the bar is meant to replace it; on = sit above a visible taskbar.
+        // 0.0.4 called this AboveTaskbar and defaulted it on; the new name drops that value, so everyone is back to covering.
+        public bool SitAboveTaskbar { get; set; }
         public int ScalePct { get; set; } = 100;
         public bool Watchdog { get; set; } = true;
 
